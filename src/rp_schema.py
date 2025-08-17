@@ -1,86 +1,105 @@
 INPUT_VALIDATIONS = {
-    'audio': {
+    'text': {
         'type': str,
-        'required': True
+        'required': True,
+        'description': 'The input text to synthesize'
     },
-    'model': {
-        'type': str,
-        'required': False,
-        'default': 'base'
-    },
-    'transcription': {
+    'voice': {
         'type': str,
         'required': False,
-        'default': 'plain text'
+        'default': 'train_atkins',
+        'description': 'Voice name (e.g., "train_atkins", "lj", "emma")'
     },
-    'translate': {
+    'preset': {
+        'type': str,
+        'required': False,
+        'default': 'fast',
+        'enum': ['ultra_fast', 'fast', 'standard', 'high_quality'],
+        'description': 'Quality/speed trade-off preset'
+    },
+    'k': {
+        'type': int,
+        'required': False,
+        'default': 1,
+        'description': 'Number of candidate samples to generate'
+    },
+    'verbose': {
         'type': bool,
         'required': False,
-        'default': False
+        'default': False,
+        'description': 'Whether to log extra info during inference'
     },
-    'language': {
-        'type': str,
+    # Advanced parameters
+    'num_autoregressive_samples': {
+        'type': int,
         'required': False,
-        'default': None
+        'default': 512,
+        'description': 'Number of AR samples for higher quality'
     },
     'temperature': {
         'type': float,
         'required': False,
-        'default': 0
-    },
-    'best_of': {
-        'type': int,
-        'required': False,
-        'default': 5
-    },
-    'beam_size': {
-        'type': int,
-        'required': False,
-        'default': 5
-    },
-    'patience': {
-        'type': float,
-        'required': False,
-        'default': None
+        'default': 0.8,
+        'description': 'Controls randomness in generation'
     },
     'length_penalty': {
         'type': float,
         'required': False,
-        'default': None
+        'default': 1.0,
+        'description': 'Prevents word repetition'
     },
-    'suppress_tokens': {
-        'type': str,
+    'repetition_penalty': {
+        'type': float,
         'required': False,
-        'default': '-1'
+        'default': 2.0,
+        'description': 'Prevents word repetition'
     },
-    'initial_prompt': {
-        'type': str,
+    'top_p': {
+        'type': float,
         'required': False,
-        'default': None
+        'default': 0.8,
+        'description': 'Nucleus sampling cutoff'
     },
-    'condition_on_previous_text': {
+    'max_mel_tokens': {
+        'type': int,
+        'required': False,
+        'default': 500,
+        'description': 'Maximum number of mel tokens'
+    },
+    'cvvp_amount': {
+        'type': float,
+        'required': False,
+        'default': 0.0,
+        'description': 'CVVP model usage amount'
+    },
+    'diffusion_iterations': {
+        'type': int,
+        'required': False,
+        'default': 100,
+        'description': 'Number of diffusion iterations'
+    },
+    'cond_free': {
         'type': bool,
         'required': False,
-        'default': True
+        'default': True,
+        'description': 'Use conditioning-free guidance'
     },
-    'temperature_increment_on_fallback': {
+    'cond_free_k': {
         'type': float,
         'required': False,
-        'default': 0.2
+        'default': 2.0,
+        'description': 'Conditioning-free guidance amount'
     },
-    'compression_ratio_threshold': {
+    'sample_batch_size': {
+        'type': int,
+        'required': False,
+        'default': 1,
+        'description': 'Batch size for sampling'
+    },
+    'diffusion_temperature': {
         'type': float,
         'required': False,
-        'default': 2.4
-    },
-    'logprob_threshold': {
-        'type': float,
-        'required': False,
-        'default': -1.0
-    },
-    'no_speech_threshold': {
-        'type': float,
-        'required': False,
-        'default': 0.6
+        'default': 1.0,
+        'description': 'Temperature for diffusion model'
     }
 }

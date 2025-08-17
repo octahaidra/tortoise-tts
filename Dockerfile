@@ -1,34 +1,57 @@
-FROM nvidia/cuda:12.2.0-base-ubuntu22.04
+FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
 
-COPY . /app
+# Set working directory
+WORKDIR /workspace
 
+# Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --allow-unauthenticated --no-install-recommends \
+    apt-get install -y --no-install-recommends \
     wget \
     git \
-    && apt-get autoremove -y \
-    && apt-get clean -y \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-ENV HOME="/root"
-ENV CONDA_DIR="${HOME}/miniconda"
-ENV PATH="$CONDA_DIR/bin":$PATH
-ENV CONDA_AUTO_UPDATE_CONDA=false
-ENV PIP_DOWNLOAD_CACHE="$HOME/.pip/cache"
-ENV TORTOISE_MODELS_DIR="$HOME/tortoise-tts/build/lib/tortoise/models"
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    CUDA_HOME=/usr/local/cuda \
+    PATH=/usr/local/cuda/bin:$PATH \
+    TORCH_CUDA_ARCH_LIST="7.0 7.5 8.0 8.6+PTX" \
+    TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+    FORCE_CUDA=1 \
+    TORTOISE_MODELS_DIR="/models"
 
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda3.sh \
-    && bash /tmp/miniconda3.sh -b -p "${CONDA_DIR}" -f -u \
-    && "${CONDA_DIR}/bin/conda" init bash \
-    && rm -f /tmp/miniconda3.sh \
-    && echo ". '${CONDA_DIR}/etc/profile.d/conda.sh'" >> "${HOME}/.profile"
+# Copy the entire project
+COPY . /workspace/
 
-# --login option used to source bashrc (thus activating conda env) at every RUN statement
-SHELL ["/bin/bash", "--login", "-c"]
+# Install CUDA-enabled PyTorch first
+RUN pip3 install --no-cache-dir \
+    torch==2.2.2+cu122 \
+    torchaudio==2.2.2+cu122 \
+    --extra-index-url https://download.pytorch.org/whl/cu122
 
-RUN conda create --name tortoise python=3.9 numba inflect -y \
-    && conda activate tortoise \
-    && conda install --yes pytorch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 pytorch-cuda=12.1 -c pytorch -c nvidia \
-    && conda install --yes transformers=4.31.0 \
-    && cd /app \
-    && python setup.py install
+# Install other dependencies from requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Install additional required packages for RunPod
+RUN pip3 install --no-cache-dir \
+    deepspeed==0.13.2 \
+    runpod==1.6.0 \
+    numba \
+    inflect
+
+# Install the package itself
+RUN pip3 install -e .
+
+# Create model directory
+RUN mkdir -p /models
+
+# RunPod specific environment variables
+ENV RUNPOD_DEBUG_LEVEL=DEBUG \
+    RUNPOD_ENABLE_GPU_METRICS=1
+
+# Default command (using the handler from the copied project)
+CMD [ "python3", "-u", "src/rp_handler.py" ]

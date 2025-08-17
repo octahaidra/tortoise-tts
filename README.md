@@ -172,12 +172,62 @@ argument.
 
 ### API
 
-Tortoise can be used programmatically, like so:
+Tortoise can be used programmatically in several ways:
+
+#### Local API
 
 ```python
 reference_clips = [utils.audio.load_audio(p, 22050) for p in clips_paths]
 tts = api.TextToSpeech()
 pcm_audio = tts.tts_with_preset("your text here", voice_samples=reference_clips, preset='fast')
+```
+
+#### RunPod Serverless API
+
+The project includes a RunPod serverless interface that accepts the following parameters:
+
+Basic Parameters:
+```json
+{
+    "text": "Text to be converted to speech",
+    "voice": "train_atkins",  // or "lj", "emma", etc.
+    "preset": "fast",  // one of: "ultra_fast", "fast", "standard", "high_quality"
+    "k": 1,  // number of candidate samples
+    "verbose": false  // whether to log extra info
+}
+```
+
+Advanced Parameters (optional):
+```json
+{
+    "num_autoregressive_samples": 512,  // more samples = higher quality
+    "temperature": 0.8,  // controls randomness
+    "length_penalty": 1.0,  // prevents word repetition
+    "repetition_penalty": 2.0,  // prevents word repetition
+    "top_p": 0.8,  // nucleus sampling cutoff
+    "max_mel_tokens": 500,
+    "cvvp_amount": 0.0,  // CVVP model usage (0.0 = disabled)
+    "diffusion_iterations": 100,  // more iterations = smoother audio
+    "cond_free": true,  // use conditioning-free guidance
+    "cond_free_k": 2.0,
+    "diffusion_temperature": 1.0
+}
+```
+
+Response Format:
+```json
+{
+    "audio_base64": "base64_encoded_wav_data",
+    "voice": "train_atkins",
+    "preset": "fast"
+}
+```
+
+Error Response:
+```json
+{
+    "error": "Error message description"
+}
 ```
 
 To use deepspeed:
