@@ -5,6 +5,8 @@ import torchaudio
 import torch.nn as nn
 import torch.nn.functional as F
 import io
+import logging
+logging.basicConfig(level=logging.INFO)
 
 class TortoiseTextToSpeech:
     """A class to handle text-to-speech conversion using Tortoise TTS."""
@@ -15,8 +17,9 @@ class TortoiseTextToSpeech:
         self.preset = "fast"  # default preset
         self.voice_samples = None
         self.conditioning_latents = None
+        logging.info("TortoiseTextToSpeech instance created.")
         
-    def setup(self, use_deepspeed=True, use_kv_cache=True):
+    def setup(self, use_deepspeed=True, use_kv_cache=True, use_float16=False):
         """
         Set up the TTS model and configure it.
         
@@ -24,7 +27,8 @@ class TortoiseTextToSpeech:
             use_deepspeed (bool): Whether to use deepspeed for faster inference
             use_kv_cache (bool): Whether to use KV caching for faster inference
         """
-        self.tts = TextToSpeech(use_deepspeed=use_deepspeed, kv_cache=use_kv_cache)
+        self.tts = TextToSpeech(use_deepspeed=use_deepspeed, kv_cache=use_kv_cache, half=use_float16)
+        logging.info("TortoiseTextToSpeech instance configured..")
         
     def set_voice(self, voice_name):
         """

@@ -1,0 +1,1 @@
+bash -c "./workspace/tortoise-tts/pod/start-up.sh && cd workspace/tortoise-tts/ && git pull && source venv/bin/activate && python src/server.py"
