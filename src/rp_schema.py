@@ -143,4 +143,3 @@ INPUT_VALIDATIONS = {
         'description': 'Whether to log extra information during inference'
     }
 }
-}
