@@ -1,8 +1,12 @@
 import torch
-from transformers import LogitsWarper
+from transformers.generation.logits_process import (
+    LogitsProcessor,
+    TemperatureLogitsWarper,
+    TopKLogitsWarper,
+    TopPLogitsWarper
+)
 
-
-class TypicalLogitsWarper(LogitsWarper):
+class TypicalLogitsWarper(LogitsProcessor):
     def __init__(self, mass: float = 0.9, filter_value: float = -float("Inf"), min_tokens_to_keep: int = 1):
         self.filter_value = filter_value
         self.mass = mass
